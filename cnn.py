@@ -108,7 +108,7 @@ history_cnn = cnn.fit(X_train_cnn, y_train_cat, epochs=5, batch_size=32, validat
 acc_cnn = cnn.evaluate(X_test_cnn, y_test_cat, verbose=0)[1]
      
 
-acc_cnn
+print(acc_cnn)
      
 
 
