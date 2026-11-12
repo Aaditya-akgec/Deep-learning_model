@@ -61,7 +61,7 @@ X_test_scaled = scaler.fit_transform(X_test)
 per = Perceptron(max_iter = 1000,random_state=42)
 per.fit(X_train_scaled, y_train)
 y_pred_percep = per.predict(X_test_scaled)
-accuracy_score(y_test,y_pred_percep)
+print(accuracy_score(y_test,y_pred_percep))
 print(classification_report(y_test,y_pred_percep))
 
 #artificial neural network--
