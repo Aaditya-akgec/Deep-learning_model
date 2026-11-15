@@ -1,23 +1,79 @@
 import numpy as np
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-import warnings
-warnings.filterwarnings('ignore')
-from sklearn.preprocessing import LabelEncoder , StandardScaler
-from sklearn.model_selection import train_test_split
+import tensorflow as tf
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Embedding, SimpleRNN, Dense
+     
 
-from sklearn.linear_model import Perceptron    # Used for simple linear classification tasks.
+sentences = [
+ "I love this product",
+ "This movie made me smile",
+ "Service was friendly and quick",
+ "Today felt bright and happy",
+ "This is the best day",
+ "Absolutely fantastic experience",
+ "I enjoyed every single moment",
+ "Great job, well done",
+ "The food tasted delicious",
+ "Totally recommend to everyone",
+ "Very satisfied with results",
+ "This worked better than expected",
+ "Amazing quality and value",
+ "Such a pleasant surprise",
+ "I feel positive about this",
+ "I hate this product",
+ "This movie bored me",
+ "Service was rude and slow",
+ "Today was cold and lonely",
+ "This is the worst day",
+ "Terrible experience overall",
+ "I regret buying this",
+ "Very disappointed with results",
+ "The food tasted awful",
+ "Do not recommend this",
+ "It broke after one use",
+ "Not worth the money",
+ "Utterly frustrating and annoying",
+ "I feel negative about this",
+ "Such a waste of time",
+]
+labels = [1]*15 + [0]*15
+labels = np.array(labels)
+     
 
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+vocab_size = 2000
+tok  = Tokenizer(num_words = vocab_size,oov_token = "")
+tok.fit_on_texts(sentences)
+seqs = tok.texts_to_sequences(sentences)
+maxlen = max(len(s) for s in seqs)
+X = pad_sequences(seqs,maxlen = maxlen,padding = 'post')
+y = labels
+     
 
-from tensorflow.keras.models import Sequential     # Sequential lets you build a neural network layer-by-layer in Keras.
+print(X[0])
+     
 
-from tensorflow.keras.layers import Dense     #Dense makes the final predictions
-from tensorflow.keras.layers import Conv2D     # Conv2D extracts features
-from tensorflow.keras.layers import Flatten    # Flatten reshapes them
+array([ 3, 26,  2,  7,  0], dtype=int32)
 
-from tensorflow.keras.layers import MaxPooling2D     # MaxPooling2D reduces size
-from tensorflow.keras.layers import Dropout          # Dropout prevents overfitting
 
-from tensorflow.keras.utils import to_categorical     # converts numeric class labels into one-hot encoded format for training classification models
+embed_dim = 16
+rnn_units = 8
+     
+
+inp = Input(shape= (maxlen,),dtype="int32",name = 'input')
+x = Embedding(input_dim=vocab_size,output_dim=embed_dim,mask_zero=True,name = 'embed')(inp)
+rnn = SimpleRNN(units = rnn_units, return_sequences = False,return_state= False,name = 'simple_rnn')
+x_last = rnn(x)
+out = Dense(1,activation='sigmoid',name = 'out')(x_last)
+model = Model(inputs =inp,outputs = out)
+model.compile(optimizer='adam',loss = 'binary_crossentropy',metrics=['accuracy'])
+print(model.summary())
+
+
+
+model.fit(X,y,epochs= 25,batch_size = 8,verbose = 1)
+     
+acc_model = model.evaluate(X, y, verbose=0)
+print(acc_model)     
+
